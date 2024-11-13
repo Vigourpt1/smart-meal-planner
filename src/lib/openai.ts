@@ -10,6 +10,29 @@ export function initializeOpenAI(apiKey: string) {
   });
 }
 
+export async function generateMealSuggestions(preferences: UserPreferences): Promise<Recipe[]> {
+  if (!openai) {
+    throw new Error('OpenAI not initialized. Please set your API key in settings.');
+  }
+
+  const prompt = `Suggest 5 recipes that match these preferences:
+    - Dietary preferences: ${preferences.dietaryPreferences.join(', ')}
+    - Allergies: ${preferences.allergies.join(', ')}
+    - Health goals: ${preferences.healthGoals?.join(', ')}
+  `;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [{
+      role: "user",
+      content: prompt
+    }],
+    temperature: 0.7,
+  });
+
+  return convertAIResponseToRecipes(response.choices[0].message.content);
+}
+
 export async function generateFullMealPlan(preferences: UserPreferences): Promise<MealPlan> {
   if (!openai) {
     throw new Error('OpenAI not initialized. Please set your API key in settings.');
@@ -36,29 +59,6 @@ export async function generateFullMealPlan(preferences: UserPreferences): Promis
   return convertAIResponseToMealPlan(suggestions, preferences);
 }
 
-export async function generateRecipeSuggestions(preferences: UserPreferences): Promise<Recipe[]> {
-  if (!openai) {
-    throw new Error('OpenAI not initialized. Please set your API key in settings.');
-  }
-
-  const prompt = `Suggest 5 recipes that match these preferences:
-    - Dietary preferences: ${preferences.dietaryPreferences.join(', ')}
-    - Allergies: ${preferences.allergies.join(', ')}
-    - Health goals: ${preferences.healthGoals?.join(', ')}
-  `;
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: [{
-      role: "user",
-      content: prompt
-    }],
-    temperature: 0.7,
-  });
-
-  return convertAIResponseToRecipes(response.choices[0].message.content);
-}
-
 function convertAIResponseToMealPlan(aiResponse: string, preferences: UserPreferences): MealPlan {
   // This is a simplified conversion - in a real app, you'd want more robust parsing
   return {
@@ -75,7 +75,31 @@ function convertAIResponseToMealPlan(aiResponse: string, preferences: UserPrefer
         lunch: generateSampleRecipe(),
         dinner: generateSampleRecipe()
       },
-      // ... other days
+      Wednesday: {
+        breakfast: generateSampleRecipe(),
+        lunch: generateSampleRecipe(),
+        dinner: generateSampleRecipe()
+      },
+      Thursday: {
+        breakfast: generateSampleRecipe(),
+        lunch: generateSampleRecipe(),
+        dinner: generateSampleRecipe()
+      },
+      Friday: {
+        breakfast: generateSampleRecipe(),
+        lunch: generateSampleRecipe(),
+        dinner: generateSampleRecipe()
+      },
+      Saturday: {
+        breakfast: generateSampleRecipe(),
+        lunch: generateSampleRecipe(),
+        dinner: generateSampleRecipe()
+      },
+      Sunday: {
+        breakfast: generateSampleRecipe(),
+        lunch: generateSampleRecipe(),
+        dinner: generateSampleRecipe()
+      }
     },
     currentSpending: 0,
     weeklyBudget: preferences.weeklyBudget

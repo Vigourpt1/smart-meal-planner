@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RecipeSelector } from './RecipeSelector';
+import { generateFullMealPlan } from '../lib/openai';
 import type { Recipe } from '../types';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];

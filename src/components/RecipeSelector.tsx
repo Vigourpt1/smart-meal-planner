@@ -1,7 +1,7 @@
 import React from 'react';
-import { Search, Filter, Loader2 } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { MealCard } from './MealCard';
-import { generateMealSuggestions } from '../lib/openai';
+import { getRecipeSuggestions } from '../services/recipeService';
 import { useStore } from '../lib/store';
 import type { Recipe } from '../types';
 
@@ -18,7 +18,7 @@ export function RecipeSelector({ isOpen, onClose, onSelect }: RecipeSelectorProp
   const [error, setError] = React.useState<string | null>(null);
   
   const preferences = useStore(state => state.preferences);
-  const apiKey = useStore(state => state.apiKey);
+  const apiKey = useStore(state => state.settings.openaiApiKey);
 
   React.useEffect(() => {
     if (isOpen && apiKey) {
@@ -35,8 +35,8 @@ export function RecipeSelector({ isOpen, onClose, onSelect }: RecipeSelectorProp
     try {
       setLoading(true);
       setError(null);
-      const suggestions = await generateMealSuggestions(preferences);
-      setSuggestions(suggestions);
+      const recipes = await getRecipeSuggestions(preferences);
+      setSuggestions(recipes);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load suggestions');
     } finally {
@@ -93,13 +93,18 @@ export function RecipeSelector({ isOpen, onClose, onSelect }: RecipeSelectorProp
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {suggestions.map((recipe, index) => (
-                <MealCard
-                  key={index}
-                  recipe={recipe}
-                  onSelect={onSelect}
-                />
-              ))}
+              {suggestions
+                .filter(recipe => 
+                  searchTerm === '' || 
+                  recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map((recipe, index) => (
+                  <MealCard
+                    key={index}
+                    recipe={recipe}
+                    onSelect={onSelect}
+                  />
+                ))}
             </div>
           )}
         </div>
